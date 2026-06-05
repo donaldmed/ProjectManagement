@@ -1,0 +1,50 @@
+
+-- Healthcare App SQL Server Schema
+
+CREATE TABLE Users (
+    UserId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    FirstName NVARCHAR(100),
+    LastName NVARCHAR(100),
+    Email NVARCHAR(255) UNIQUE NOT NULL,
+    PasswordHash NVARCHAR(500),
+    Role NVARCHAR(50),
+    CreatedAt DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TABLE Doctors (
+    DoctorId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    UserId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Users(UserId),
+    Specialty NVARCHAR(100),
+    LicenseNumber NVARCHAR(100),
+    Bio NVARCHAR(MAX),
+    IsAvailable BIT DEFAULT 1
+);
+
+CREATE TABLE Appointments (
+    AppointmentId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PatientId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Users(UserId),
+    DoctorId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Doctors(DoctorId),
+    AppointmentDate DATETIME2,
+    Status NVARCHAR(50),
+    CreatedAt DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TABLE Payments (
+    PaymentId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    AppointmentId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Appointments(AppointmentId),
+    Amount DECIMAL(10,2),
+    Status NVARCHAR(50),
+    PaymentDate DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TABLE MedicalRecords (
+    RecordId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PatientId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Users(UserId),
+    DoctorId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Doctors(DoctorId),
+    Notes NVARCHAR(MAX),
+    CreatedAt DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE INDEX IX_Appointments_DoctorId ON Appointments(DoctorId);
+CREATE INDEX IX_Appointments_PatientId ON Appointments(PatientId);
+CREATE INDEX IX_Users_Email ON Users(Email);
